@@ -18,14 +18,26 @@ import AgentCopilotDrawer from './components/AgentCopilotDrawer.jsx';
 import CreateBucketModal from './components/CreateBucketModal.jsx';
 import Toast from './components/Toast.jsx';
 
+// Dual Mode Components
+import PayPalDashboardView from './components/PayPalDashboardView.jsx';
+import PayPalCheckoutSimulationModal from './components/PayPalCheckoutSimulationModal.jsx';
+import EmbedCodeModal from './components/EmbedCodeModal.jsx';
+
 import { createOrder, captureOrder, disbursePayout, fetchAiAnalysis } from './services/api.js';
 
 export default function App() {
+  // Application Mode: 'standalone' (Able AI App) OR 'paypal_embedded' (Inside PayPal)
+  const [appMode, setAppMode] = useState('standalone');
+
   // Navigation & Drawer State
   const [activeTab, setActiveTab] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Modals for Embedded Experience
+  const [isCheckoutDemoOpen, setIsCheckoutDemoOpen] = useState(false);
+  const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
 
   // Core Financial State
   const [lumpBalance, setLumpBalance] = useState(2450.00);
@@ -271,7 +283,7 @@ export default function App() {
       setPaypalModal(null);
       triggerToast(
         `PayPal Transfer Complete: £${amount.toFixed(2)} moved to ${targetName}`,
-        `Sandbox Order ID ${txId} verified & logged to AG Grid.`
+        `Sandbox Order ID ${txId} verified & logged.`
       );
     } catch (err) {
       triggerToast('PayPal Error', err.message || 'Payment capture failed.');
@@ -367,6 +379,50 @@ export default function App() {
     }
   };
 
+  // Checkout Guardrail Handlers
+  const handleCheckoutSplit = ({ amount, friendHandle, description }) => {
+    const txId = `PAY-${Math.floor(100000 + Math.random() * 900000)}S`;
+    setLumpBalance((prev) => Math.max(0, +(prev - amount).toFixed(2)));
+    setTransactions((prev) => [
+      {
+        id: txId,
+        date: new Date().toISOString().split('T')[0],
+        description: `${description} • Split with ${friendHandle}`,
+        bucket: 'Safe Spend Guardrail',
+        type: 'PayPal P2P Split',
+        amount: amount,
+        status: 'Verified'
+      },
+      ...prev
+    ]);
+    triggerToast(
+      `Guardrail Split Approved: £${amount.toFixed(2)} paid via PayPal`,
+      `Request for £${amount.toFixed(2)} dispatched to ${friendHandle}. Safe spend preserved!`
+    );
+  };
+
+  const handleCheckoutFull = ({ amount, description }) => {
+    const txId = `PAY-${Math.floor(100000 + Math.random() * 900000)}F`;
+    setLumpBalance((prev) => Math.max(0, +(prev - amount).toFixed(2)));
+    setDailySafeSpend((prev) => Math.max(10, +(prev - 3.50).toFixed(2)));
+    setTransactions((prev) => [
+      {
+        id: txId,
+        date: new Date().toISOString().split('T')[0],
+        description: `${description} • Paid in Full`,
+        bucket: 'Direct Spend',
+        type: 'PayPal Orders v2',
+        amount: amount,
+        status: 'Verified'
+      },
+      ...prev
+    ]);
+    triggerToast(
+      `Paid £${amount.toFixed(2)} via PayPal`,
+      'Daily safe-spend auto-adjusted by -£3.50/day over the next 3 days.'
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-[#0F172A] font-sans flex flex-col selection:bg-teal-500/20">
       {/* Sidebar Drawer */}
@@ -378,96 +434,124 @@ export default function App() {
         navItems={navItems}
       />
 
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar with Experience Switcher */}
       <Navbar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         navItems={navItems}
         onOpenSidebar={() => setIsSidebarOpen(true)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
+        appMode={appMode}
+        onChangeAppMode={setAppMode}
+        onOpenCheckoutDemo={() => setIsCheckoutDemoOpen(true)}
+        onOpenEmbedModal={() => setIsEmbedModalOpen(true)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* KPI Top Cards */}
-        <KpiCards
-          lumpBalance={lumpBalance}
-          dailySafeSpend={dailySafeSpend}
-          totalSavedInBuckets={totalSavedInBuckets}
-          bucketCount={buckets.length}
-          groupGoals={groupGoals}
-        />
+      {/* ===================================================================== */}
+      {/* EXPERIENCE 1: STANDALONE ABLE AI APPLICATION                          */}
+      {/* ===================================================================== */}
+      {appMode === 'standalone' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300">
+          {/* KPI Top Cards */}
+          <KpiCards
+            lumpBalance={lumpBalance}
+            dailySafeSpend={dailySafeSpend}
+            totalSavedInBuckets={totalSavedInBuckets}
+            bucketCount={buckets.length}
+            groupGoals={groupGoals}
+          />
 
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8">
-            <BehaviouralNudge
-              nudge={currentNudge}
-              isAnalyzing={isAnalyzing}
-              onRunAnalysis={handleRunNewAnalysis}
-              onOpenCheckout={openPayPalCheckout}
-              onOpenCopilot={() => setIsCopilotOpen(true)}
-            />
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8">
+              <BehaviouralNudge
+                nudge={currentNudge}
+                isAnalyzing={isAnalyzing}
+                onRunAnalysis={handleRunNewAnalysis}
+                onOpenCheckout={openPayPalCheckout}
+                onOpenCopilot={() => setIsCopilotOpen(true)}
+              />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                <SavingsBuckets
-                  buckets={buckets}
-                  onOpenCheckout={openPayPalCheckout}
-                  onNavigateToBucketsTab={() => setActiveTab('buckets')}
-                  isFullView={false}
-                />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <SavingsBuckets
+                    buckets={buckets}
+                    onOpenCheckout={openPayPalCheckout}
+                    onNavigateToBucketsTab={() => setActiveTab('buckets')}
+                    isFullView={false}
+                  />
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                  <GroupGoals
+                    groupGoals={groupGoals}
+                    onOpenCheckout={openPayPalCheckout}
+                    onInviteFriend={handleInviteFriend}
+                    onTriggerPayout={handleTriggerGroupPayout}
+                    onNavigateToGroupsTab={() => setActiveTab('groups')}
+                    isFullView={false}
+                  />
+                </div>
               </div>
 
-              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                <GroupGoals
-                  groupGoals={groupGoals}
-                  onOpenCheckout={openPayPalCheckout}
-                  onInviteFriend={handleInviteFriend}
-                  onTriggerPayout={handleTriggerGroupPayout}
-                  onNavigateToGroupsTab={() => setActiveTab('groups')}
-                  isFullView={false}
-                />
-              </div>
+              <LiveLedger
+                transactions={transactions}
+                isCompact={true}
+                onNavigateToLedger={() => setActiveTab('ledger')}
+              />
             </div>
+          )}
 
+          {/* TAB 2: SAVINGS BUCKETS */}
+          {activeTab === 'buckets' && (
+            <SavingsBuckets
+              buckets={buckets}
+              onOpenCheckout={openPayPalCheckout}
+              onOpenNewBucketModal={() => setShowNewBucketModal(true)}
+              isFullView={true}
+            />
+          )}
+
+          {/* TAB 3: GROUP GOALS */}
+          {activeTab === 'groups' && (
+            <GroupGoals
+              groupGoals={groupGoals}
+              onOpenCheckout={openPayPalCheckout}
+              onInviteFriend={handleInviteFriend}
+              onTriggerPayout={handleTriggerGroupPayout}
+              isFullView={true}
+            />
+          )}
+
+          {/* TAB 4: LIVE LEDGER (POWERED BY AG GRID) */}
+          {activeTab === 'ledger' && (
             <LiveLedger
               transactions={transactions}
-              isCompact={true}
-              onNavigateToLedger={() => setActiveTab('ledger')}
+              isCompact={false}
             />
-          </div>
-        )}
+          )}
+        </main>
+      )}
 
-        {/* TAB 2: SAVINGS BUCKETS */}
-        {activeTab === 'buckets' && (
-          <SavingsBuckets
+      {/* ===================================================================== */}
+      {/* EXPERIENCE 2: ABLE AI AS AN EMBEDDED WIDGET INSIDE PAYPAL             */}
+      {/* ===================================================================== */}
+      {appMode === 'paypal_embedded' && (
+        <div className="flex-1 animate-in fade-in duration-300">
+          <PayPalDashboardView
+            lumpBalance={lumpBalance}
+            dailySafeSpend={dailySafeSpend}
             buckets={buckets}
-            onOpenCheckout={openPayPalCheckout}
-            onOpenNewBucketModal={() => setShowNewBucketModal(true)}
-            isFullView={true}
-          />
-        )}
-
-        {/* TAB 3: GROUP GOALS */}
-        {activeTab === 'groups' && (
-          <GroupGoals
-            groupGoals={groupGoals}
-            onOpenCheckout={openPayPalCheckout}
-            onInviteFriend={handleInviteFriend}
-            onTriggerPayout={handleTriggerGroupPayout}
-            isFullView={true}
-          />
-        )}
-
-        {/* TAB 4: LIVE LEDGER (POWERED BY AG GRID) */}
-        {activeTab === 'ledger' && (
-          <LiveLedger
             transactions={transactions}
-            isCompact={false}
+            nudge={currentNudge}
+            onOpenCheckout={openPayPalCheckout}
+            onOpenCopilot={() => setIsCopilotOpen(true)}
+            onSwitchToStandalone={() => setAppMode('standalone')}
+            onOpenCheckoutDemo={() => setIsCheckoutDemoOpen(true)}
+            isProcessing={isProcessingPayPal}
           />
-        )}
-      </main>
+        </div>
+      )}
 
       {/* Interactive PayPal Sandbox Checkout Modal */}
       <PayPalModal
@@ -496,6 +580,21 @@ export default function App() {
         isOpen={showNewBucketModal}
         onClose={() => setShowNewBucketModal(false)}
         onCreateBucket={handleCreateBucket}
+      />
+
+      {/* Merchant Checkout Guardrail Simulation Modal */}
+      <PayPalCheckoutSimulationModal
+        isOpen={isCheckoutDemoOpen}
+        onClose={() => setIsCheckoutDemoOpen(false)}
+        dailySafeSpend={dailySafeSpend}
+        onApplySplit={handleCheckoutSplit}
+        onProceedFull={handleCheckoutFull}
+      />
+
+      {/* Embed Code Modal */}
+      <EmbedCodeModal
+        isOpen={isEmbedModalOpen}
+        onClose={() => setIsEmbedModalOpen(false)}
       />
 
       {/* Global Toast */}
