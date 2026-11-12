@@ -22,6 +22,7 @@ import Toast from './components/Toast.jsx';
 import PayPalMobileAppView from './components/PayPalMobileAppView.jsx';
 import PayPalCheckoutSimulationModal from './components/PayPalCheckoutSimulationModal.jsx';
 import EmbedCodeModal from './components/EmbedCodeModal.jsx';
+import SpreadsheetImportModal from './components/SpreadsheetImportModal.jsx';
 
 import { createOrder, captureOrder, disbursePayout, fetchAiAnalysis } from './services/api.js';
 
@@ -35,9 +36,10 @@ export default function App() {
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // Modals for Mobile & Embedded Experience
+  // Modals for Mobile, Embedded & Spreadsheet Experience
   const [isCheckoutDemoOpen, setIsCheckoutDemoOpen] = useState(false);
   const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
+  const [isSpreadsheetModalOpen, setIsSpreadsheetModalOpen] = useState(false);
 
   // Core Financial State
   const [lumpBalance, setLumpBalance] = useState(2450.00);
@@ -423,6 +425,22 @@ export default function App() {
     );
   };
 
+  // Spreadsheet Ingestion Handler
+  const handleSpreadsheetImportComplete = (data) => {
+    if (data.lumpBalance) setLumpBalance(data.lumpBalance);
+    if (data.dailySafeSpend) setDailySafeSpend(data.dailySafeSpend);
+    if (data.buckets && data.buckets.length > 0) {
+      setBuckets((prev) => [...data.buckets, ...prev]);
+    }
+    if (data.transactions && data.transactions.length > 0) {
+      setTransactions((prev) => [...data.transactions, ...prev]);
+    }
+    triggerToast(
+      'Budget Spreadsheet Ingested!',
+      data.summary || 'Able AI successfully calibrated your account from your existing budget.'
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-[#0F172A] font-sans flex flex-col selection:bg-teal-500/20">
       {/* Sidebar Drawer */}
@@ -445,6 +463,7 @@ export default function App() {
         onChangeAppMode={setAppMode}
         onOpenCheckoutDemo={() => setIsCheckoutDemoOpen(true)}
         onOpenEmbedModal={() => setIsEmbedModalOpen(true)}
+        onOpenSpreadsheetModal={() => setIsSpreadsheetModalOpen(true)}
       />
 
       {/* ===================================================================== */}
@@ -594,6 +613,13 @@ export default function App() {
       <EmbedCodeModal
         isOpen={isEmbedModalOpen}
         onClose={() => setIsEmbedModalOpen(false)}
+      />
+
+      {/* Spreadsheet Import Modal */}
+      <SpreadsheetImportModal
+        isOpen={isSpreadsheetModalOpen}
+        onClose={() => setIsSpreadsheetModalOpen(false)}
+        onImportComplete={handleSpreadsheetImportComplete}
       />
 
       {/* Global Toast */}

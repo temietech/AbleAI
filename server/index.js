@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createPayPalOrder, capturePayPalOrder, createPayPalPayout } from './paypal.js';
-import { analyzeSpendingWithGemini, chatWithAbleCopilot } from './gemini.js';
+import { analyzeSpendingWithGemini, chatWithAbleCopilot, ingestSpreadsheetWithGemini } from './gemini.js';
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -107,6 +107,22 @@ app.post('/api/ai/chat', async (req, res) => {
   } catch (error) {
     console.error('Error in AI Copilot chat:', error);
     res.status(500).json({ error: error.message || 'Failed to process AI chat' });
+  }
+});
+
+// AI: Smart Spreadsheet Ingestion
+app.post('/api/ai/import-spreadsheet', async (req, res) => {
+  try {
+    const { csvContent } = req.body;
+    if (!csvContent) {
+      return res.status(400).json({ error: 'csvContent is required' });
+    }
+
+    const result = await ingestSpreadsheetWithGemini({ csvContent });
+    res.json(result);
+  } catch (error) {
+    console.error('Error importing spreadsheet with AI:', error);
+    res.status(500).json({ error: error.message || 'Failed to ingest spreadsheet' });
   }
 });
 
