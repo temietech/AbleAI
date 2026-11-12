@@ -21,6 +21,13 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Video generation temporary working files
+demo_video/
+test_*
+capture_scenes.js
+record_test.js
+record_action_sequence.js
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json
