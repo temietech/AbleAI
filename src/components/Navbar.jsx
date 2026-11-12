@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bot, Layers, Puzzle, ShoppingBag, Smartphone, Monitor, FileSpreadsheet } from 'lucide-react';
+import { Menu, Bot, Layers, Puzzle, ShoppingBag, Smartphone, Monitor, FileSpreadsheet, Zap } from 'lucide-react';
 import AbleLogo from './AbleLogo.jsx';
 
 export default function Navbar({
@@ -12,7 +12,8 @@ export default function Navbar({
   onChangeAppMode,
   onOpenCheckoutDemo,
   onOpenEmbedModal,
-  onOpenSpreadsheetModal
+  onOpenSpreadsheetModal,
+  onSimulateOpenBanking
 }) {
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
@@ -51,6 +52,15 @@ export default function Navbar({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={onSimulateOpenBanking}
+              className="px-2.5 py-1 rounded-md bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+              title="Simulates real-time card spend webhook from Open Banking API (recalibrates safe-spend)"
+            >
+              <Zap className="w-3 h-3 text-purple-300 animate-pulse" />
+              <span>Simulate Open Banking Webhook (£3.80)</span>
+            </button>
+
             <button
               onClick={onOpenSpreadsheetModal}
               className="px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
@@ -125,6 +135,11 @@ export default function Navbar({
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-800 text-xs font-bold">
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
             PayPal Sandbox
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 border border-purple-200/80 text-purple-800 text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+            Open Banking Webhooks
           </div>
         </div>
       </div>

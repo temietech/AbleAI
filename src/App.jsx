@@ -41,12 +41,20 @@ export default function App() {
   const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
   const [isSpreadsheetModalOpen, setIsSpreadsheetModalOpen] = useState(false);
 
-  // Core Financial State
-  const [lumpBalance, setLumpBalance] = useState(2450.00);
-  const [dailySafeSpend, setDailySafeSpend] = useState(34.50);
+  // Core Financial State (Persistent in Local Storage)
+  const [lumpBalance, setLumpBalance] = useState(() => {
+    const s = localStorage.getItem('able_lump');
+    return s ? parseFloat(s) : 2450.00;
+  });
+  const [dailySafeSpend, setDailySafeSpend] = useState(() => {
+    const s = localStorage.getItem('able_safe');
+    return s ? parseFloat(s) : 34.50;
+  });
 
   // Savings Buckets State
-  const [buckets, setBuckets] = useState([
+  const [buckets, setBuckets] = useState(() => {
+    const s = localStorage.getItem('able_buckets');
+    return s ? JSON.parse(s) : [
     {
       id: 'b1',
       name: 'Emergency Buffer',
@@ -74,7 +82,8 @@ export default function App() {
       autoRule: '5% of freelance payouts',
       iconType: 'zap'
     }
-  ]);
+  ];
+  });
 
   // Group Goals State
   const [groupGoals, setGroupGoals] = useState([
@@ -105,8 +114,10 @@ export default function App() {
     }
   ]);
 
-  // Live Ledger State
-  const [transactions, setTransactions] = useState([
+  // Live Ledger State (Persistent)
+  const [transactions, setTransactions] = useState(() => {
+    const s = localStorage.getItem('able_txs');
+    return s ? JSON.parse(s) : [
     {
       id: 'PAY-894120A',
       date: '2026-11-12',
@@ -143,7 +154,42 @@ export default function App() {
       amount: 2534.50,
       status: 'Cleared'
     }
-  ]);
+  ];
+  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem('able_lump', lumpBalance.toString());
+  }, [lumpBalance]);
+
+  useEffect(() => {
+    localStorage.setItem('able_safe', dailySafeSpend.toString());
+  }, [dailySafeSpend]);
+
+  useEffect(() => {
+    localStorage.setItem('able_buckets', JSON.stringify(buckets));
+  }, [buckets]);
+
+  useEffect(() => {
+    localStorage.setItem('able_txs', JSON.stringify(transactions));
+  }, [transactions]);
+
+  // Open Banking Live Webhook Simulator
+  const handleSimulateOpenBankingSpend = (merchant = 'Pret A Manger', amount = 3.80) => {
+    setDailySafeSpend((prev) => Math.max(0, +(prev - amount).toFixed(2)));
+    setLumpBalance((prev) => Math.max(0, +(prev - amount).toFixed(2)));
+    const newTx = {
+      id: `OB-${Math.floor(100000 + Math.random() * 900000)}`,
+      date: new Date().toISOString().split('T')[0],
+      description: `Live Card Spend • ${merchant}`,
+      bucket: 'Daily Living',
+      type: 'Open Banking Webhook (Live)',
+      amount: amount,
+      status: 'Verified'
+    };
+    setTransactions((prev) => [newTx, ...prev]);
+    triggerToast('Open Banking Webhook Received', `Spent £${amount.toFixed(2)} at ${merchant}. Safe spend dynamically recalibrated!`);
+  };
 
   // AI Behavioural Nudge State
   const [currentNudge, setCurrentNudge] = useState({
@@ -464,6 +510,7 @@ export default function App() {
         onOpenCheckoutDemo={() => setIsCheckoutDemoOpen(true)}
         onOpenEmbedModal={() => setIsEmbedModalOpen(true)}
         onOpenSpreadsheetModal={() => setIsSpreadsheetModalOpen(true)}
+        onSimulateOpenBanking={() => handleSimulateOpenBankingSpend('Pret A Manger', 3.80)}
       />
 
       {/* ===================================================================== */}
