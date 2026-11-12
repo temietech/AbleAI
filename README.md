@@ -5,20 +5,29 @@
 
 ---
 
-## 💡 Overview & Problem Statement
+## 💡 Overview & Dual-Persona Architecture
 
 Students, gig economy workers, and young professionals often receive income in **periodic lump sums** (e.g., student loans, maintenance grants, freelance contracts). Without continuous guidance, early-period overspending frequently leaves users struggling toward the end of the payment cycle.
 
-**Able AI** solves this with an **autonomous behavioural finance engine**:
-1. **Dynamic Daily Safe-Spend**: Calculates daily spending ceilings based on remaining days, committed bills, and spending velocity.
-2. **Autonomous Savings Buckets**: Turns small daily surpluses into dedicated cushions (Emergency Buffer, Tech upgrades, Wealth) with 1-click PayPal micro-transfers.
-3. **Collaborative Group Goals**: Allows roommates or friends to pool money for shared expenses via PayPal usernames, triggering automated **PayPal Payouts** once 100% funded.
-4. **Agentic Copilot**: An interactive AI financial assistant powered by Google Gemini that analyzes cash flow and proposes actionable PayPal transfer directives in real time.
-5. **Live Audit Ledger**: An enterprise-grade transactional ledger powered by **AG Grid**, tracking every order creation, capture, and payout disbursement.
+**Able AI** operates in **two distinct modalities**:
+
+### 1. Standalone Autonomous Finance App
+A dedicated personal finance portal featuring:
+- **Dynamic Daily Safe-Spend**: Real-time spending velocity calculation that updates dynamically as expenses occur.
+- **Autonomous Savings Buckets**: Automated micro-habits (sweeps, roundups) funded directly via PayPal Orders v2 API.
+- **Collaborative Group Goals**: Shared pools with PayPal user handles and automated disbursement via the PayPal Payouts API.
+- **Agentic AI Copilot**: Interactive Gemini-powered assistant capable of formulating executable PayPal payment directives.
+- **AG Grid Live Financial Ledger**: Enterprise-grade transaction grid with multi-column filtering, search, and CSV export (qualifying for the **$5,000 AG Grid Sponsor Prize**).
+
+### 2. Embedded Widget Inside PayPal & Checkout Guardrail
+Able AI can be embedded directly into the **PayPal Customer Wallet / Dashboard** as a native mini-app:
+- **In-Wallet Widget**: Sits right on the PayPal Dashboard (`paypal.com/myaccount`), letting users view their daily safe-spend ceiling and execute instant 1-click micro-sweeps using their PayPal balance without switching apps.
+- **Point-of-Sale Checkout Guardrail**: Intercepts online merchant purchases via PayPal Checkout. If a purchase exceeds the user's daily safe spend, Able AI suggests agentic split options (e.g., "Split 50% with @maya_r via PayPal P2P") before payment authorization.
+- **Embeddable Component**: Provides drop-in HTML Iframe, Web Component, and React snippets for fintech developers.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🛠️ Tech Stack & PayPal / AI Integration
 
 - **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, AG Grid Community (`ag-grid-react`)
 - **Backend API**: Node.js, Express, REST APIs
@@ -47,26 +56,7 @@ cd able-ai
 npm install
 ```
 
-### 3. Environment Configuration (Optional for Live API Calls)
-Create a `.env` file from the example template:
-```bash
-cp .env.example .env
-```
-
-Edit `.env` to include your credentials:
-```env
-PORT=5000
-PAYPAL_MODE=sandbox
-PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
-PAYPAL_CLIENT_ID=YOUR_SANDBOX_CLIENT_ID
-PAYPAL_CLIENT_SECRET=YOUR_SANDBOX_CLIENT_SECRET
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-GEMINI_MODEL=gemini-1.5-flash
-```
-
-> **Note for Judges**: Even without API credentials configured, Able AI includes a complete sandbox simulation mode that executes the exact API workflows, order captures, and payouts with zero friction.
-
-### 4. Run the Full-Stack Application
+### 3. Run the Full-Stack Application
 Start both the Express backend API and the Vite frontend concurrently:
 ```bash
 npm run dev
@@ -75,33 +65,12 @@ npm run dev
 - **Frontend App**: [http://localhost:5173](http://localhost:5173)
 - **Backend API**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
 
----
-
-## 🌟 Key Features Walkthrough
-
-### 1. Gemini Behavioural Nudge Engine
-- Analyzes lump balance, remaining cycle days, and recent transaction history.
-- Calculates micro-surpluses and displays targeted recommendations with one-click PayPal checkout.
-- Recalculates dynamically with the "Recalculate AI" button.
-
-### 2. Autonomous Savings Buckets
-- Target-based goals with automated micro-saving rules (sweeps, roundups).
-- One-click "+ Quick Fund £20 via PayPal" or "+£10 Micro-Habit".
-- New buckets can be created dynamically and linked immediately.
-
-### 3. Collaborative Social Finance (PayPal Group Pools)
-- Group goals (e.g., Ibiza Summer Trip, Flatmate Bills Pool).
-- Real-time contributor addition by PayPal username handle.
-- Automated **PayPal Payouts API** execution when the target is reached.
-
-### 4. Able AI Copilot (Agentic Commerce)
-- Interactive slide-out chat drawer.
-- Users can ask questions like *"Can I afford dinner tonight for £25?"* or *"Save £20 to my Emergency Buffer"*.
-- The agent formulates executable PayPal micro-actions right inside the chat window.
-
-### 5. AG Grid Live Financial Ledger (Sponsor Prize Contender)
-- Real-time audit log with search, column filtering, sorting, custom status badges, and CSV export.
-- Demonstrates advanced AG Grid capabilities for enterprise financial reconciliation.
+### 4. Experience Switcher
+Use the top bar in the application to toggle between:
+- **1. Standalone App**: The comprehensive personal finance hub.
+- **2. Inside PayPal (Widget)**: The simulated PayPal Dashboard featuring the embedded Able AI widget.
+- **Checkout Guardrail**: Test point-of-sale purchase interception.
+- **Embed Code**: View embeddable Iframe and Web Component snippets.
 
 ---
 
