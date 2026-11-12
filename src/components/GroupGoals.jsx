@@ -221,12 +221,25 @@ export default function GroupGoals({
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => onOpenCheckout(50, goal.id, goal.name, 'group')}
-                  className="flex-1 py-3.5 px-5 rounded-xl bg-[#FFC439] hover:bg-[#F4BB33] text-[#003087] font-extrabold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-[#FFC439] hover:bg-[#F4BB33] text-[#003087] font-extrabold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span className="italic font-black text-base">
                     Pay<span className="text-[#0079C1]">Pal</span>
                   </span>
                   <span>• Contribute £50.00</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onTriggerPayout) {
+                      onTriggerPayout(goal);
+                    }
+                  }}
+                  className="py-3.5 px-4 rounded-xl bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Gemini Vision verifies flight / accommodation invoice before releasing pool"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-teal-300" />
+                  <span>Verify Ticket & Release Escrow (Vision AI)</span>
                 </button>
 
                 {isComplete && (

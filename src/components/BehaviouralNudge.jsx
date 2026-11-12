@@ -37,9 +37,16 @@ export default function BehaviouralNudge({
             {nudge.rationale}
           </p>
           {nudge.safeSpendAdjustment && (
-            <p className="text-xs font-bold text-teal-700 bg-teal-50/70 inline-block px-3 py-1 rounded-lg">
-              ✓ {nudge.safeSpendAdjustment}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs font-bold text-teal-700 bg-teal-50/70 inline-block px-3 py-1 rounded-lg">
+                ✓ {nudge.safeSpendAdjustment}
+              </span>
+
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Autonomous Mandate Active: Auto-sweeps weekly surplus to vault without prompt</span>
+              </div>
+            </div>
           )}
         </div>
 
