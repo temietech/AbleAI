@@ -18,15 +18,15 @@ import AgentCopilotDrawer from './components/AgentCopilotDrawer.jsx';
 import CreateBucketModal from './components/CreateBucketModal.jsx';
 import Toast from './components/Toast.jsx';
 
-// Dual Mode Components
-import PayPalDashboardView from './components/PayPalDashboardView.jsx';
+// Dual Mode & Mobile App Components
+import PayPalMobileAppView from './components/PayPalMobileAppView.jsx';
 import PayPalCheckoutSimulationModal from './components/PayPalCheckoutSimulationModal.jsx';
 import EmbedCodeModal from './components/EmbedCodeModal.jsx';
 
 import { createOrder, captureOrder, disbursePayout, fetchAiAnalysis } from './services/api.js';
 
 export default function App() {
-  // Application Mode: 'standalone' (Able AI App) OR 'paypal_embedded' (Inside PayPal)
+  // Application Mode: 'standalone' (Able AI App) OR 'paypal_mobile' (Inside PayPal Mobile App)
   const [appMode, setAppMode] = useState('standalone');
 
   // Navigation & Drawer State
@@ -35,7 +35,7 @@ export default function App() {
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // Modals for Embedded Experience
+  // Modals for Mobile & Embedded Experience
   const [isCheckoutDemoOpen, setIsCheckoutDemoOpen] = useState(false);
   const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
 
@@ -534,11 +534,11 @@ export default function App() {
       )}
 
       {/* ===================================================================== */}
-      {/* EXPERIENCE 2: ABLE AI AS AN EMBEDDED WIDGET INSIDE PAYPAL             */}
+      {/* EXPERIENCE 2: ABLE AI AS AN EMBEDDED WIDGET INSIDE PAYPAL MOBILE APP  */}
       {/* ===================================================================== */}
-      {appMode === 'paypal_embedded' && (
+      {appMode === 'paypal_mobile' && (
         <div className="flex-1 animate-in fade-in duration-300">
-          <PayPalDashboardView
+          <PayPalMobileAppView
             lumpBalance={lumpBalance}
             dailySafeSpend={dailySafeSpend}
             buckets={buckets}
@@ -547,7 +547,6 @@ export default function App() {
             onOpenCheckout={openPayPalCheckout}
             onOpenCopilot={() => setIsCopilotOpen(true)}
             onSwitchToStandalone={() => setAppMode('standalone')}
-            onOpenCheckoutDemo={() => setIsCheckoutDemoOpen(true)}
             isProcessing={isProcessingPayPal}
           />
         </div>

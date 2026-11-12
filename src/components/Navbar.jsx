@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bot, Layers, Puzzle, ShoppingBag } from 'lucide-react';
+import { Menu, Bot, Layers, Puzzle, ShoppingBag, Smartphone, Monitor } from 'lucide-react';
 import AbleLogo from './AbleLogo.jsx';
 
 export default function Navbar({
@@ -16,32 +16,35 @@ export default function Navbar({
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
       {/* Top Utility Bar for Experience Mode Toggle */}
-      <div className="bg-[#0A1628] text-white py-1.5 px-4 text-xs">
+      <div className="bg-[#0A1628] text-white py-2 px-4 text-xs">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-teal-400">
-              Experience Mode:
+              Presentation Mode:
             </span>
             <div className="flex items-center bg-slate-800/90 rounded-lg p-0.5 border border-slate-700">
               <button
                 onClick={() => onChangeAppMode('standalone')}
-                className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
+                className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 ${
                   appMode === 'standalone'
                     ? 'bg-teal-500 text-[#0A1628] shadow-xs'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
-                1. Standalone App
+                <Monitor className="w-3 h-3" />
+                <span>1. Standalone App</span>
               </button>
+
               <button
-                onClick={() => onChangeAppMode('paypal_embedded')}
-                className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
-                  appMode === 'paypal_embedded'
+                onClick={() => onChangeAppMode('paypal_mobile')}
+                className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 ${
+                  appMode === 'paypal_mobile'
                     ? 'bg-teal-500 text-[#0A1628] shadow-xs'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
-                2. Inside PayPal (Widget)
+                <Smartphone className="w-3 h-3" />
+                <span>2. Inside PayPal Mobile App</span>
               </button>
             </div>
           </div>
@@ -49,7 +52,7 @@ export default function Navbar({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenCheckoutDemo}
-              className="px-2.5 py-1 rounded-md bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 text-[11px] font-bold flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1 rounded-md bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
             >
               <ShoppingBag className="w-3 h-3 text-amber-300" />
               <span>Checkout Guardrail</span>
@@ -57,7 +60,7 @@ export default function Navbar({
 
             <button
               onClick={onOpenEmbedModal}
-              className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-bold flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
             >
               <Puzzle className="w-3 h-3 text-teal-400" />
               <span>Embed Code</span>
@@ -82,7 +85,7 @@ export default function Navbar({
           <AbleLogo showSubtitle={true} lightText={false} />
         </div>
 
-        {/* Quick Pill Tab Switcher */}
+        {/* Quick Pill Tab Switcher (Visible in Standalone Mode) */}
         {appMode === 'standalone' && (
           <div className="hidden md:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/70">
             {navItems.map((item) => (
