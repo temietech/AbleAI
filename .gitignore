@@ -27,6 +27,9 @@ test_*
 capture_scenes.js
 record_test.js
 record_action_sequence.js
+*.mp4
+*.wav
+*.mp3
 
 # Editor directories
 .vscode/*
